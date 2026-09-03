@@ -13,7 +13,7 @@ torch.manual_seed(2)
 device = algorithm.open_cpu()
 start_time = algorithm.open_clock()
 
-train_data, train_label, test_data, test_label = data_info.get_MNIST(device, "/content/AI-project/Pytorch/dataset/MNIST/")
+train_data, train_label, test_data, test_label = data_info.get_MNIST(device, "/content/AI-project/Pytorch/assets/MNIST/")
 algorithm.close_clock_and_show_time(device, start_time)
 
 data = MLP.extract(device, train_data, train_label, [128, 64], list_func = [
