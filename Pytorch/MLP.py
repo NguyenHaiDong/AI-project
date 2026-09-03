@@ -17,7 +17,7 @@ def extract(device, X, Y, number_neurons_per_layer = [100, 100], c = -1, list_fu
         delta = int(number_layers - len(list_func) / 2)
         list_func = [list_func[-4], list_func[-3]] * delta + list_func
 
-    W = [torch.randn(dims[i], dims[i + 1], device=device) * ((2.0 / dims[i + 1]) ** 0.5) for i in range(number_layers)]
+    W = [torch.randn(dims[i], dims[i + 1], device=device) * ((2.0 / dims[i]) ** 0.5) for i in range(number_layers)]
     B = [torch.zeros(1, dims[i + 1], device=device) for i in range(number_layers)]
 
     return (W, B, X, Y, n, d, c, number_layers, list_func)
@@ -90,8 +90,9 @@ class Neural_Network:
                 E *= self.list_func[2 * (i - 1) + 1](self.Z[i - 1])
 
 
-    def fit(self, device, batch_size = 64, delta = 1e-4, max_it = 100):
-        last_cost = 0
+    def fit(self, device, patience = 10, batch_size = 64, delta = 1e-4, max_it = 100):
+        last_cost = 0.0
+        patience_count = 0
         batch_size = min(self.n, batch_size)
 
         for it in range(1, max_it + 1):
@@ -114,7 +115,11 @@ class Neural_Network:
 
             cur_cost = (cur_cost / self.n).item()
             if abs(cur_cost - last_cost) <= delta:
-                return it
+                patience_count += 1
+                if patience_count > patience:
+                    return it
+            else:
+                patience_count = 0
             last_cost = cur_cost
         return max_it
 
