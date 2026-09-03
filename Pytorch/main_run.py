@@ -10,7 +10,8 @@ torch.manual_seed(2)
 
 
 
-device = algorithm.open_cpu()
+device = algorithm.open_gpu()
+print("Tên GPU:", torch.cuda.get_device_name(0) if torch.cuda.is_available() else "Vẫn là CPU!")
 start_time = algorithm.open_clock()
 
 train_data, train_label, test_data, test_label = data_info.get_MNIST(device, "/content/AI-project/Pytorch/assets/MNIST/")
