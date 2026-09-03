@@ -14,10 +14,18 @@ device = algorithm.open_gpu()
 print("Tên GPU:", torch.cuda.get_device_name(0) if torch.cuda.is_available() else "Vẫn là CPU!")
 start_time = algorithm.open_clock()
 
-train_data, train_label, test_data, test_label = data_info.get_MNIST(device, "/content/AI-project/Pytorch/assets/MNIST/")
+train_data, train_label, test_data, test_label = data_info.get_images(
+    device,
+    [
+        "/content/AI-project/Pytorch/assets/Faces/man",
+        "/content/AI-project/Pytorch/assets/Faces/woman",
+    ],
+    width = 64,
+    height = 64
+)
 algorithm.close_clock_and_show_time(device, start_time)
 
-data = MLP.extract(device, train_data, train_label, [128, 64], list_func = [
+data = MLP.extract(device, train_data, train_label, [128, 64, 64, 64], list_func = [
     algorithm.ReLU, algorithm.grad_ReLU,
     algorithm.softmax, algorithm.cost
 ])
