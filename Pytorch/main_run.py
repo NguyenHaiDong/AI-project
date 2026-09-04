@@ -20,6 +20,7 @@ train_data, train_label, test_data, test_label = data_info.get_images(
         "/content/AI-project/Pytorch/assets/Faces/man",
         "/content/AI-project/Pytorch/assets/Faces/woman",
     ],
+    number_images = [9500, 9500],
     width = 64,
     height = 64
 )
