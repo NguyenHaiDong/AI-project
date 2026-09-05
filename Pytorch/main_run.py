@@ -31,7 +31,7 @@ data = MLP.extract(device, train_data, train_label, [128, 64], list_func = [
     algorithm.ReLU, algorithm.grad_ReLU,
     algorithm.softmax, algorithm.cost
 ])
-gradient_descent = MLP.Adam(device, data, eta = 1e-4)
+gradient_descent = MLP.Momentum(device, data, eta = 0.003)
 neural_network = MLP.Neural_Network(device, data, gradient_descent)
 
 it = neural_network.fit(device, batch_size = 1024, delta = 1e-4, max_it = 2000)
