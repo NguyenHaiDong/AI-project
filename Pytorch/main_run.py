@@ -17,12 +17,12 @@ start_time = algorithm.open_clock()
 train_data, train_label, test_data, test_label = data_info.get_images(
     device,
     [
-        "/content/AI-project/Pytorch/assets/Faces/man",
-        "/content/AI-project/Pytorch/assets/Faces/woman",
+        "/Users/nguyenhaidong/Desktop/AI/assets/Faces/man",
+        "/Users/nguyenhaidong/Desktop/AI/assets/Faces/woman",
     ],
     number_images = [9400, 9400],
-    width = 64,
-    height = 64
+    width = 32,
+    height = 32
 )
 # print(train_label.shape[0], test_label.shape[0])
 algorithm.close_clock_and_show_time(device, start_time, "Tổng thời gian đọc dữ liệu")

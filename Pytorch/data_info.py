@@ -131,6 +131,7 @@ def get_images(
 
         lbl = i if manual_label is None else manual_label[i]
         all_label.extend([lbl] * len(cur))
+        print(len(cur))
 
     # 1. Ghép danh sách tensor bằng PyTorch thuần (không qua NumPy)
     data = torch.stack(all_data)
