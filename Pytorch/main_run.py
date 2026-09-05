@@ -21,8 +21,8 @@ train_data, train_label, test_data, test_label = data_info.get_images(
         "/content/AI-project/Pytorch/assets/Faces/woman",
     ],
     number_images = [9400, 9400],
-    width = 32,
-    height = 32
+    width = 64,
+    height = 64
 )
 # print(train_label.shape[0], test_label.shape[0])
 algorithm.close_clock_and_show_time(device, start_time, "Tổng thời gian đọc dữ liệu")
