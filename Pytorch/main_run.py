@@ -27,7 +27,7 @@ train_data, train_label, test_data, test_label = data_info.get_images(
 # print(train_label.shape[0], test_label.shape[0])
 algorithm.close_clock_and_show_time(device, start_time, "Tổng thời gian đọc dữ liệu")
 
-data = MLP.extract(device, train_data, train_label, [128, 64], list_func = [
+data = MLP.extract(device, train_data, train_label, [128, 64, 64, 64], list_func = [
     algorithm.ReLU, algorithm.grad_ReLU,
     algorithm.softmax, algorithm.cost
 ])
