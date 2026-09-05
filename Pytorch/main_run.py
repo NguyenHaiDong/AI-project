@@ -34,7 +34,7 @@ data = MLP.extract(device, train_data, train_label, [128, 64], list_func = [
 gradient_descent = MLP.Momentum(device, data, eta = 0.003)
 neural_network = MLP.Neural_Network(device, data, gradient_descent)
 
-it = neural_network.fit(device, batch_size = 1024, delta = 1e-6, max_it = 10000)
+it = neural_network.fit(device, batch_size = 1024, delta = 1e-3, max_it = 10000)
 pred = neural_network.predict(test_data)
 
 algorithm.close_clock_and_show_time(device, start_time)
