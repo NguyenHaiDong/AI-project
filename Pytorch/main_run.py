@@ -11,9 +11,9 @@ torch.manual_seed(2)
 
 
 device = algorithm.open_gpu()
-print("Tên GPU:", torch.cuda.get_device_name(0) if torch.cuda.is_available() else "Vẫn là CPU!")
 start_time = algorithm.open_clock()
 
+# train_data, train_label, test_data, test_label = data_info.get_MNIST(device, "/Users/nguyenhaidong/Desktop/AI/assets/MNIST/")
 train_data, train_label, test_data, test_label = data_info.get_images(
     device,
     [
@@ -21,20 +21,20 @@ train_data, train_label, test_data, test_label = data_info.get_images(
         "/content/AI-project/Pytorch/assets/Faces/woman",
     ],
     number_images = [9400, 9400],
-    width = 64,
-    height = 64
+    width = 32,
+    height = 32
 )
-print(train_label.shape[0], test_label.shape[0])
+# print(train_label.shape[0], test_label.shape[0])
 algorithm.close_clock_and_show_time(device, start_time, "Tổng thời gian đọc dữ liệu")
 
-data = MLP.extract(device, train_data, train_label, [128, 64, 64, 64], list_func = [
+data = MLP.extract(device, train_data, train_label, [128, 64], list_func = [
     algorithm.ReLU, algorithm.grad_ReLU,
     algorithm.softmax, algorithm.cost
 ])
-gradient_descent = MLP.Momentum(device, data)
+gradient_descent = MLP.Adam(device, data, eta = 1e-4)
 neural_network = MLP.Neural_Network(device, data, gradient_descent)
 
-it = neural_network.fit(device, batch_size = 1024, max_it = 100)
+it = neural_network.fit(device, batch_size = 1024, delta = 1e-4, max_it = 2000)
 pred = neural_network.predict(test_data)
 
 algorithm.close_clock_and_show_time(device, start_time)
