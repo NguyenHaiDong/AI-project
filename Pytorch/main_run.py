@@ -37,7 +37,7 @@ neural_network = nn.MLP(device, data, gradient_descent, drop_out = 0.08)
 
 it = neural_network.fit(
     device, batch_size = 1024, delta = 1e-4, max_it = 150,
-    # test_batch = 10, test_data = test_data, test_label = test_label
+    test_batch = 10, test_data = test_data, test_label = test_label
 )
 pred = neural_network.predict(test_data)
 
