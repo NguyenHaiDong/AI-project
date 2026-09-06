@@ -43,5 +43,3 @@ pred = neural_network.predict(test_data)
 
 algorithm.close_clock_and_show_time(device, start_time)
 display.show_accuracy_rate_and_number_iterations(pred, test_label, it)
-
-print("HI")
