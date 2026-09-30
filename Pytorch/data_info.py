@@ -5,6 +5,9 @@ import cv2
 from mnist import MNIST
 import torch
 import algorithm
+from functools import partial
+
+
 
 
 def get_MNIST(device, path, number_image=-1):
@@ -97,7 +100,7 @@ def read_folder(folder_path, width, height, number_image=-1, max_workers=8, is_f
 
     tasks = [(f, width, height) for f in file_path]
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        images = list(executor.map(_load_single_image, tasks))
+        images = list(executor.map(partial(_load_single_image, is_flatten=is_flatten), tasks))
 
     return images
 
