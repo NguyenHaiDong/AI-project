@@ -32,17 +32,20 @@ print(train_data.shape)
 
 data = cnn.extract_for_CNN(
     device, train_data, train_label, 
-    layer_size_for_mlp = [128, 64],
-    number_conv_layer = 3, C = [16, 32, 64], kernel = [5, 5, 5], s = 1, p = 1,
+    layer_size_for_mlp = [256, 64],
+    number_conv_layer = 5, 
+    C = [16, 32, 64, 128, 128],
+    kernel = [3, 3, 3, 3, 3], s = 1, p = 1,
     max_pooling_kernel_size = 2, max_pooling_stride = 2
 )
-gradient_descent = algorithm.Adam(device, (data[2], data[3]), eta = 0.0003)
+gradient_descent = algorithm.Adam(device, (data[2], data[3]), eta = 0.0002)
 neural_network = cnn.CNN(device, data, gradient_descent, drop_out = 0.08)
 
 it = neural_network.fit(
     device, batch_size = 256, delta = 1e-4, max_it = 100
 )
-pred = neural_network.predict(test_data)
+with torch.no_grad():
+    pred = neural_network.predict(test_data)
 
 algorithm.close_clock_and_show_time(device, start_time)
 display.show_accuracy_rate_and_number_iterations(pred, test_label, it)
