@@ -173,6 +173,7 @@ class CNN:
             else:
                 patience_count = 0
             last_cost = cur_cost
+            print(f"Epoch {it}/{max_it} - Cost: {cur_cost:.4f}")
         return max_it
 
 
