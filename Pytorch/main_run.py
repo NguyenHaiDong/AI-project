@@ -33,10 +33,10 @@ print(train_data.shape)
 data = cnn.extract_for_CNN(
     device, train_data, train_label, 
     layer_size_for_mlp = [128, 64],
-    number_conv_layer = 5, C = [16, 16, 16, 16, 16], kernel = [3, 3, 3, 3, 3], s = 1, p = 1,
+    number_conv_layer = 3, C = [16, 32, 64], kernel = [5, 5, 5], s = 1, p = 1,
     max_pooling_kernel_size = 2, max_pooling_stride = 2
 )
-gradient_descent = algorithm.Momentum(device, (data[2], data[3]), eta = 1e-4, gamma = 0.95)
+gradient_descent = algorithm.Adam(device, (data[2], data[3]), eta = 0.0003)
 neural_network = cnn.CNN(device, data, gradient_descent, drop_out = 0.08)
 
 it = neural_network.fit(
