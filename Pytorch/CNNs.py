@@ -2,6 +2,7 @@ import algorithm
 import torch
 import torch.nn.functional as F
 import MLPs as mlp
+import display
 
 
 
@@ -135,7 +136,10 @@ class CNN:
                 )
 
 
-    def fit(self, device, data = -1, label = -1, patience = 10, batch_size = 64, delta = 1e-4, max_it = 100):
+    def fit(
+        self, device, data = -1, label = -1, patience = 10, batch_size = 64, delta = 1e-4, max_it = 100,
+        is_test = False, test_batch = -1, test_data = None, test_label = None
+    ):
         if data == -1:
             data = self.X
         if label == -1:
@@ -173,6 +177,11 @@ class CNN:
             else:
                 patience_count = 0
             last_cost = cur_cost
+
+            if is_test == True and it % test_batch == 0:
+                with torch.no_grad:
+                    pred = self.predict(test_data)
+                    display.show_accuracy_rate_and_number_iterations(pred, test_label, it)
             print(f"Epoch {it}/{max_it} - Cost: {cur_cost:.4f}")
         return max_it
 

@@ -42,10 +42,10 @@ gradient_descent = algorithm.Adam(device, (data[2], data[3]), eta = 0.0002)
 neural_network = cnn.CNN(device, data, gradient_descent, drop_out = 0.08)
 
 it = neural_network.fit(
-    device, batch_size = 256, delta = 1e-4, max_it = 100
+    device, batch_size = 128, delta = 1e-4, max_it = 40,
+    is_test = True, test_batch = 10, test_data = test_data, test_label = test_label 
 )
-with torch.no_grad():
-    pred = neural_network.predict(test_data)
+pred = neural_network.predict(test_data)
 
 algorithm.close_clock_and_show_time(device, start_time)
 display.show_accuracy_rate_and_number_iterations(pred, test_label, it)

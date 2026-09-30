@@ -82,7 +82,7 @@ class MLP:
 
     def fit(
         self, device, data = -1, label = -1, patience = 10, batch_size = 64, delta = 1e-4, max_it = 100, 
-        test_batch = -1, test_data = None, test_label = None
+        is_test = False, test_batch = -1, test_data = None, test_label = None
     ):
         N = data.shape[0]
         last_cost = 0.0
@@ -121,7 +121,7 @@ class MLP:
                 patience_count = 0
             last_cost = cur_cost
 
-            if test_batch == -1:
+            if is_test == True and it % test_batch == 0:
                 print(f"Done It #{it}")
             elif it % test_batch == 0:
                 pred = self.predict(test_data)
