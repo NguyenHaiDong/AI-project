@@ -1,3 +1,7 @@
+import os
+os.environ["VECLIB_MAXIMUM_THREADS"] = "5"
+os.environ["OPENBLAS_NUM_THREADS"] = "5"
+os.environ["NUMEXPR_NUM_THREADS"] = "5"
 import time
 
 import torch
@@ -6,6 +10,7 @@ import data_info
 import display
 import MLPs as mlp
 import CNNs as cnn
+
 torch.manual_seed(2)
 
 
@@ -32,17 +37,17 @@ print(train_data.shape)
 
 data = cnn.extract_for_CNN(
     device, train_data, train_label, 
-    layer_size_for_mlp = [256, 64],
-    number_conv_layer = 5, 
-    C = [16, 32, 64, 128, 128],
-    kernel = [3, 3, 3, 3, 3], s = 1, p = 1,
+    layer_size_for_mlp = [128, 64],
+    number_conv_layer = 3, 
+    C = [16, 32, 64],
+    kernel = [3, 3, 3], s = 1, p = 1,
     max_pooling_kernel_size = 2, max_pooling_stride = 2
 )
 gradient_descent = algorithm.Adam(device, (data[2], data[3]), eta = 0.0002)
-neural_network = cnn.CNN(device, data, gradient_descent, drop_out = 0.08)
+neural_network = cnn.CNN(device, data, gradient_descent, drop_out = 0.1)
 
 it = neural_network.fit(
-    device, batch_size = 128, delta = 1e-4, max_it = 40,
+    device, batch_size = 128, delta = 1e-4, max_it = 100,
     is_test = True, test_batch = 10, test_data = test_data, test_label = test_label 
 )
 pred = neural_network.predict(test_data)

@@ -3,6 +3,7 @@ import torch
 import torch.nn.functional as F
 import MLPs as mlp
 import display
+import gc
 
 
 
@@ -179,14 +180,17 @@ class CNN:
             last_cost = cur_cost
 
             if is_test == True and it % test_batch == 0:
-                with torch.no_grad:
-                    pred = self.predict(test_data)
-                    display.show_accuracy_rate_and_number_iterations(pred, test_label, it)
+                pred = self.predict(test_data)
+                display.show_accuracy_rate_and_number_iterations(pred, test_label, it)
             print(f"Epoch {it}/{max_it} - Cost: {cur_cost:.4f}")
         return max_it
 
 
     def predict(self, data):
+        if torch.backends.mps.is_available():
+            torch.mps.empty_cache()
+        gc.collect()
+
         out = data
         for i in range(self.number_conv_layer):
             out = F.unfold(out, kernel_size = self.kernel[i], stride = self.s, padding = self.p)
