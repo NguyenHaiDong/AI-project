@@ -27,7 +27,7 @@ train_data, train_label, test_data, test_label = data_info.get_images(
         "/kaggle/working/AI-project/Pytorch/assets/Faces/man",
         "/kaggle/working/AI-project/Pytorch/assets/Faces/woman"
     ],
-    number_images = [1000, 1000],
+    number_images = [9400, 9400],
     width = 64,
     height = 64,
     is_flatten = False
