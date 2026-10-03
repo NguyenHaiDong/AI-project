@@ -27,9 +27,9 @@ train_data, train_label, test_data, test_label = data_info.get_images(
         "/Users/nguyenhaidong/Desktop/AI/assets/Faces/man",
         "/Users/nguyenhaidong/Desktop/AI/assets/Faces/woman"
     ],
-    number_images = [100, 100],
-    width = 128,
-    height = 128,
+    number_images = [1000, 1000],
+    width = 64,
+    height = 64,
     is_flatten = False
 )
 # handle_image.convert_color(train_data, [1.5])
@@ -50,10 +50,13 @@ data = cnn.extract_for_CNN(
 gradient_descent = algorithm.Adam(device, (data[2], data[3]), eta = 0.0001)
 neural_network = cnn.CNN(device, data, gradient_descent, drop_out = 0.08)
 
-it = neural_network.fit(
-    device, batch_size = 128, delta = 1e-4, max_it = 500,
-    is_test = True, test_batch = 10, test_data = test_data, test_label = test_label 
-)
+angles = [5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0]
+for i in range(len(angles)):
+    train_data = handle_image.rotate_image(train_data, angle = angles[i])
+    it = neural_network.fit(
+        device, batch_size = 128, delta = 1e-4, max_it = 50,
+        is_test = True, test_batch = 10, test_data = test_data, test_label = test_label 
+    )
 pred = neural_network.predict(test_data)
 
 algorithm.close_clock_and_show_time(device, start_time)

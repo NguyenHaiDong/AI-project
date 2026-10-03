@@ -4,6 +4,7 @@ import torch.nn.functional as F
 import MLPs as mlp
 import display
 import gc
+import handle_image as handle_image
 
 
 
@@ -45,7 +46,6 @@ def extract_for_CNN(
         X, Y, W, B, grad_W, grad_B, A, Z, dims, sz, c, number_conv_layer, s, p, C, kernel, h, w, layer_size_for_mlp, 
         max_pooling_kernel_size, max_pooling_stride, max_pooling_padding
     )
-
 
 
 
