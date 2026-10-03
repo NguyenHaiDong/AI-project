@@ -89,7 +89,7 @@ def max_pooling(A, kernel_size = 3, stride = 3, padding = 0):
     A_unfold = A_unfold.view(N, C, kernel_size * kernel_size, H_out * W_out)
 
     values, indices = torch.max(A_unfold, dim = 2)
-    
+
     A_unfold = values
     A_unfold = A_unfold.view(N, C, H_out, W_out)
 
