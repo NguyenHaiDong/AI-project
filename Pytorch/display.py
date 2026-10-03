@@ -27,9 +27,9 @@ def show_accuracy_rate_and_number_iterations(A, B, it, endline_ = "\n"):
     print(f"Accuracy rate: {accuracy_rate}%")
 
 
-def show_image(image, width=32, height=32):
-    image = to_numpy(image).reshape(width, height)
-    plt.imshow(image, cmap="gray")
+def show_image(image, height = 32, width = 32):
+    image = to_numpy(image).reshape(height, width)
+    plt.imshow(image, cmap="gray", vmin=0, vmax=1)
     plt.axis("off")
     plt.show()
 
