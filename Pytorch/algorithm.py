@@ -2,6 +2,9 @@ import time
 import torch
 import torch.nn.functional as F
 
+import psutil
+import os
+
 
 
 
@@ -42,6 +45,14 @@ def open_multi_gpu(num_devices=None):
 def open_cpu():
     device = torch.device("cpu")
     return device
+
+def get_ram_usage():
+    # Lấy thông tin tiến trình hiện tại
+    process = psutil.Process(os.getpid())
+    # rss (Resident Set Size): lượng RAM vật lý thực tế đang chiếm
+    mem_bytes = process.memory_info().rss
+    mem_mb = mem_bytes / (1024 ** 2)
+    return mem_mb
 
 
 
