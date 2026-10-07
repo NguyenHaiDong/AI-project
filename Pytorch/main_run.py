@@ -41,13 +41,13 @@ print(train_data.shape)
 
 data = cnn.extract_for_CNN(
     device, train_data, train_label, 
-    layer_size_for_mlp = [64, 32],
+    layer_size_for_mlp = [128, 64],
     number_conv_layer = 3, 
-    C = [16, 32, 32],
+    C = [16, 32, 64],
     kernel = [3, 3, 3], s = 1, p = 1,
     max_pooling_kernel_size = 2, max_pooling_stride = 2
 )
-gradient_descent = algorithm.Adam(device, (data[2], data[3]), eta = 0.0002)
+gradient_descent = algorithm.Adam(device, (data[2], data[3]), eta = 0.0003)
 neural_network = cnn.CNN(device, data, gradient_descent, drop_out = 0.08)
 
 # angles = [5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0]
@@ -60,7 +60,7 @@ neural_network = cnn.CNN(device, data, gradient_descent, drop_out = 0.08)
 # pred = neural_network.predict(test_data)
 
 it = neural_network.fit(
-    device, batch_size = 128, delta = 1e-4, max_it = 100,
+    device, train_data, data[1], batch_size = 128, delta = 1e-4, max_it = 100,
     is_test = True, test_batch = 10, test_data = test_data, test_label = test_label 
 )
 pred = neural_network.predict(test_data)

@@ -7,12 +7,14 @@ import torch.nn.functional as F
 
 
 def extract_for_MLP(
-    device, X, Y, number_neurons_per_layer = [100, 100], c = -1, list_func = None
+    device, X, Y, number_neurons_per_layer = [100, 100], c = -1, list_func = None, is_need_to_convert_one_hot_coding = False,
 ):
     n = X.shape[0]
     d = X.shape[1]
     if c == -1:
         c = torch.unique(Y).numel()
+    if is_need_to_convert_one_hot_coding == True:
+        Y = algorithm.convert_to_one_hot_coding(device, Y, c)
 
     dims = [d] + number_neurons_per_layer + [c]
     number_layers = len(dims) - 1
@@ -24,25 +26,22 @@ def extract_for_MLP(
     W = [torch.randn(dims[i], dims[i + 1], device=device) * algorithm.get_better_randn(dims[i]) for i in range(number_layers)]
     B = [torch.zeros(1, dims[i + 1], device=device) for i in range(number_layers)]
 
-    return (X, Y, W, B, n, d, c, number_layers, list_func)
+    return (Y, W, B, n, d, c, number_layers, list_func)
 
 
 
 
 class MLP:
-    def __init__(self, device, data, GD, drop_out = 0.2, is_need_to_convert_Y = True):
-        self.X = data[0]
-        if is_need_to_convert_Y:
-            self.Y = algorithm.convert_to_one_hot_coding(device, data[1], data[6])
+    def __init__(self, device, data, GD, drop_out = 0.2):
+        self.Y = data[0]
+        self.W = data[1]
+        self.B = data[2]
 
-        self.W = data[2]
-        self.B = data[3]
-
-        self.n = data[4]
-        self.d = data[5]
-        self.c = data[6]
-        self.number_layers = data[7]
-        self.list_func = data[8]
+        self.n = data[3]
+        self.d = data[4]
+        self.c = data[5]
+        self.number_layers = data[6]
+        self.list_func = data[7]
         self.drop_out = drop_out
         self.scale = 1.0 / (1.0 - self.drop_out)
 
@@ -81,18 +80,13 @@ class MLP:
 
 
     def fit(
-        self, device, data = -1, label = -1, patience = 10, batch_size = 64, delta = 1e-4, max_it = 100, 
+        self, device, data, label, patience = 10, batch_size = 64, delta = 1e-4, max_it = 100, 
         is_test = False, test_batch = -1, test_data = None, test_label = None
     ):
         N = data.shape[0]
         last_cost = 0.0
         patience_count = 0
         batch_size = min(N, batch_size)
-
-        if data == -1:
-            data = self.X
-        if label == -1:
-            label = self.Y
 
         for it in range(1, max_it + 1):
             sample = torch.randperm(N, device=device)

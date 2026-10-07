@@ -44,7 +44,7 @@ def extract_for_CNN(
     Z = [None for _ in range(number_conv_layer)]
 
     return (
-        X, Y, W, B, grad_W, grad_B, A, Z, dims, sz, c, number_conv_layer, s, p, C, kernel, h, w, layer_size_for_mlp, 
+        n, Y, W, B, grad_W, grad_B, A, Z, dims, sz, c, number_conv_layer, s, p, C, kernel, h, w, layer_size_for_mlp, 
         max_pooling_kernel_size, max_pooling_stride, max_pooling_padding
     )
 
@@ -52,9 +52,8 @@ def extract_for_CNN(
 
 class CNN:
     def __init__(self, device, data, gradient_descent, drop_out = 0.1):
-        self.X = data[0]
+        self.n = data[0]
         self.Y = data[1]
-
         self.W = data[2]
         self.B = data[3]
         self.grad_W = data[4]
@@ -85,14 +84,16 @@ class CNN:
         self.GD = gradient_descent
 
         mlp_data = mlp.extract_for_MLP(
-            device, torch.zeros(self.X.shape[0], self.C[-1] * self.final_h * self.final_w , device = device), self.Y, 
+            device, torch.zeros(self.n, self.C[-1] * self.final_h * self.final_w , device = device), self.Y, 
             number_neurons_per_layer = self.layer_size_for_mlp, 
             list_func = [
                 algorithm.ReLU, algorithm.grad_ReLU,
                 algorithm.softmax, algorithm.cost
-        ])
-        gradient_descent = algorithm.Momentum(device, (mlp_data[2], mlp_data[3]), eta = 0.003, gamma = 0.95)
-        self.NN_MLP = mlp.MLP(device, mlp_data, gradient_descent, drop_out = drop_out, is_need_to_convert_Y = False)
+            ],
+            is_need_to_convert_one_hot_coding = False
+        )
+        gradient_descent = algorithm.Momentum(device, (mlp_data[1], mlp_data[2]), eta = 0.003, gamma = 0.95)
+        self.NN_MLP = mlp.MLP(device, mlp_data, gradient_descent, drop_out = drop_out)
 
 
     def feed_forward(self):
@@ -140,13 +141,9 @@ class CNN:
 
 
     def fit(
-        self, device, data = -1, label = -1, patience = 10, batch_size = 64, delta = 1e-4, max_it = 100,
-        is_has_unique_data = False, is_test = False, test_batch = -1, test_data = None, test_label = None
+        self, device, data, label, patience = 10, batch_size = 64, delta = 1e-4, max_it = 100,
+        is_test = False, test_batch = -1, test_data = None, test_label = None
     ):
-        if is_has_unique_data == False:
-            data = self.X
-            label = self.Y
-
         N = data.shape[0]
         last_cost = 0.0
         patience_count = 0
