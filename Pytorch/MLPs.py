@@ -49,7 +49,7 @@ class MLP:
         self.grad_W = [torch.zeros_like(w, device=device) for w in self.W]
         self.grad_B = [torch.zeros_like(b, device=device) for b in self.B]
 
-        self.A = [self.X] + [None for _ in range(self.number_layers)]
+        self.A = [None for _ in range(self.number_layers + 1)]
         self.Z = [None for _ in range(self.number_layers)]
         self.GD = GD
 

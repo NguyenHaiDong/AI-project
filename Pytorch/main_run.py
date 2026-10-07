@@ -28,8 +28,8 @@ train_data, train_label, test_data, test_label = data_info.get_images(
         "/Users/nguyenhaidong/Desktop/AI/assets/Faces/woman"
     ],
     number_images = [1000, 1000],
-    width = 128,
-    height = 128,
+    width = 64,
+    height = 64,
     is_flatten = False
 )
 # handle_image.convert_color(train_data, [1.5])
@@ -41,13 +41,13 @@ print(train_data.shape)
 
 data = cnn.extract_for_CNN(
     device, train_data, train_label, 
-    layer_size_for_mlp = [128, 64],
+    layer_size_for_mlp = [64, 32],
     number_conv_layer = 3, 
-    C = [16, 32, 64],
+    C = [16, 32, 32],
     kernel = [3, 3, 3], s = 1, p = 1,
     max_pooling_kernel_size = 2, max_pooling_stride = 2
 )
-gradient_descent = algorithm.Adam(device, (data[2], data[3]), eta = 0.0001)
+gradient_descent = algorithm.Adam(device, (data[2], data[3]), eta = 0.0002)
 neural_network = cnn.CNN(device, data, gradient_descent, drop_out = 0.08)
 
 # angles = [5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0]

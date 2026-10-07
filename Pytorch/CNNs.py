@@ -14,6 +14,7 @@ def extract_for_CNN(
     number_conv_layer = 3, C = [16, 16, 16], kernel = [5, 5, 5], s = 1, p = 1,
     max_pooling_kernel_size = 3, max_pooling_stride = 3, max_pooling_padding = 0
 ):
+    X = X.to(device)
     n = X.shape[0]
     if c == -1:
         c = torch.unique(Y).numel()
@@ -39,7 +40,7 @@ def extract_for_CNN(
     grad_W = [torch.zeros_like(w) for w in W]
     grad_B = [torch.zeros_like(b) for b in B]
 
-    A = [X] + [torch.zeros(n, dims[i + 1], sz[i][0], sz[i][1], device = device) for i in range(number_conv_layer)]
+    A = [None for _ in range(number_conv_layer + 1)]
     Z = [None for _ in range(number_conv_layer)]
 
     return (
@@ -84,7 +85,7 @@ class CNN:
         self.GD = gradient_descent
 
         mlp_data = mlp.extract_for_MLP(
-            device, torch.zeros(self.X.shape[0], self.final_h * self.final_w * self.C[-1], device = device), self.Y, 
+            device, torch.zeros(self.X.shape[0], self.C[-1] * self.final_h * self.final_w , device = device), self.Y, 
             number_neurons_per_layer = self.layer_size_for_mlp, 
             list_func = [
                 algorithm.ReLU, algorithm.grad_ReLU,
@@ -106,14 +107,15 @@ class CNN:
                 self.A[i + 1], self.max_pooling_kernel_size, self.max_pooling_stride, self.max_pooling_padding
             )
 
-        N, C, W, H = self.A[-1].shape
-        self.NN_MLP.A[0] = self.A[-1].view(N, C * W * H)
+        N, C, H, W = self.A[-1].shape
+        self.NN_MLP.A[0] = self.A[-1].view(N, C * H * W)
         self.NN_MLP.feed_forward()
 
 
     def backward_propagation(self, y):
+        N, C, H, W = self.A[-1].shape
         E = self.NN_MLP.backward_propagation(y)
-        E = E.view(self.A[-1].shape)
+        E = E.view(N, C, H, W)
 
         for i in range(self.number_conv_layer - 1, -1, -1):
             E = algorithm.grad_max_pooling(E, self.pool_cache[i])
@@ -139,11 +141,10 @@ class CNN:
 
     def fit(
         self, device, data = -1, label = -1, patience = 10, batch_size = 64, delta = 1e-4, max_it = 100,
-        is_test = False, test_batch = -1, test_data = None, test_label = None
+        is_has_unique_data = False, is_test = False, test_batch = -1, test_data = None, test_label = None
     ):
-        if data == -1:
+        if is_has_unique_data == False:
             data = self.X
-        if label == -1:
             label = self.Y
 
         N = data.shape[0]
@@ -201,6 +202,6 @@ class CNN:
             out = algorithm.ReLU(out)
             out = algorithm.max_pooling(out, self.max_pooling_kernel_size, self.max_pooling_stride, self.max_pooling_padding)[0]
 
-        N, C, W, H = out.shape
+        N, C, H, W = out.shape
         out = out.view(N, C * W * H)
         return self.NN_MLP.predict(out)
