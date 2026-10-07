@@ -76,11 +76,17 @@ def get_accuracy_rate(A, B):
 
 
 
-def ReLU(Z):
-    return torch.relu(Z)
+# def ReLU(Z):
+#     return torch.relu(Z)
 
-def grad_ReLU(Z):
-    return (Z > 0).float()
+# def grad_ReLU(Z):
+#     return (Z > 0).float()
+
+def ReLU(Z, alpha = 0.01):
+    return torch.where(Z > 0, Z, Z * alpha)
+
+def grad_ReLU(Z, alpha = 0.01):
+    return torch.where(Z > 0, torch.ones_like(Z), torch.full_like(Z, alpha))
 
 def cost(Y, Y_hat):
     return (-torch.sum(Y * torch.log(Y_hat + 1e-9)) / Y.shape[0])
