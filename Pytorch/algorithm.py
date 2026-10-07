@@ -165,12 +165,14 @@ def get_better_randn(n):
     return (2.0 / n) ** 0.5
 
 class Adam:
-    def __init__(self, device, data, beta1 = 0.9, beta2 = 0.999, eta = 3e-4, epsilon = 1e-7, weight_decay = 0.01):
-        self.eta = eta
+    def __init__(self, device, data, beta1 = 0.9, beta2 = 0.999, eta = 3e-4, epsilon = 1e-7, weight_decay = 0.01, decay_eta = 1e-4):
         self.beta1 = beta1
         self.beta2 = beta2
         self.epsilon = epsilon
         self.weight_decay = weight_decay
+
+        self.eta = eta
+        self.decay_eta = decay_eta
 
         self.number_layers = len(data[0])
         self.b1 = 1.0
@@ -184,14 +186,15 @@ class Adam:
 
 
     def gradient_descent(self, it, W, B, grad_W, grad_B):
+        cur_eta = self.eta / (1.0 + self.decay_eta * it)
         self.b1 *= self.beta1
         self.b2 *= self.beta2
 
         b1 = 1.0 - self.b1
         b2 = 1.0 - self.b2
-        a = self.eta * (b2 ** 0.5) / b1
+        a = cur_eta * (b2 ** 0.5) / b1
         b = self.epsilon * (b2 ** 0.5)
-        decay_factor = 1.0 - self.eta * self.weight_decay
+        decay_factor = 1.0 - cur_eta * self.weight_decay
 
         for i in range(self.number_layers):
             self.W_M[i].mul_(self.beta1).add_(grad_W[i], alpha = (1.0 - self.beta1))
@@ -200,7 +203,7 @@ class Adam:
             self.B_M[i].mul_(self.beta1).add_(grad_B[i], alpha = (1.0 - self.beta1))
             self.B_V[i].mul_(self.beta2).addcmul_(grad_B[i], grad_B[i], value = (1.0 - self.beta2))
 
-            # W[i].mul_(decay_factor)
+            W[i].mul_(decay_factor)
 
             denom_W = torch.sqrt(self.W_V[i]).add_(b)
             W[i].addcdiv_(self.W_M[i], denom_W, value = -a)
