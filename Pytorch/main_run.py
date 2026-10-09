@@ -28,7 +28,6 @@ train_data, train_label, test_data, test_label = data_info.get_images(
         "/kaggle/working/AI-project/Pytorch/assets/Faces/woman"
     ],
     number_images = [9400, 9400],
-    divide = [100.0, 0.0],
     width = 64,
     height = 64,
     is_flatten = False
