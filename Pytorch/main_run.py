@@ -24,8 +24,8 @@ start_time = algorithm.open_clock()
 train_data, train_label, test_data, test_label = data_info.get_images(
     device,
     [
-        "/Users/nguyenhaidong/Desktop/AI/assets/Faces/man",
-        "/Users/nguyenhaidong/Desktop/AI/assets/Faces/woman"
+        "/kaggle/working/AI-project/Pytorch/assets/Faces/man",
+        "/kaggle/working/AI-project/Pytorch/assets/Faces/woman"
     ],
     number_images = [9400, 9400],
     divide = [100.0, 0.0],
