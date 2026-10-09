@@ -27,7 +27,8 @@ train_data, train_label, test_data, test_label = data_info.get_images(
         "/Users/nguyenhaidong/Desktop/AI/assets/Faces/man",
         "/Users/nguyenhaidong/Desktop/AI/assets/Faces/woman"
     ],
-    number_images = [1000, 1000],
+    number_images = [9400, 9400],
+    divide = [100.0, 0.0],
     width = 64,
     height = 64,
     is_flatten = False
@@ -47,7 +48,7 @@ data = cnn.extract_for_CNN(
     kernel = [3, 3, 3], s = 1, p = 1,
     max_pooling_kernel_size = 2, max_pooling_stride = 2
 )
-gradient_descent = algorithm.Adam(device, (data[2], data[3]), eta = 0.0003, weight_decay = 0.1)
+gradient_descent = algorithm.Adam(device, (data[2], data[3]), eta = 0.0003, weight_decay = 0.1, decay_eta = 0.02)
 neural_network = cnn.CNN(device, data, gradient_descent, drop_out = 0.08)
 
 # angles = [5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0]
@@ -61,12 +62,12 @@ neural_network = cnn.CNN(device, data, gradient_descent, drop_out = 0.08)
 
 it = neural_network.fit(
     device, train_data, data[1], batch_size = 128, delta = 1e-4, max_it = 300,
-    is_test = True, test_batch = 10, test_data = test_data, test_label = test_label 
+    is_test = True, test_batch = 10, test_data = train_data, test_label = train_label 
 )
-pred = neural_network.predict(test_data)
+pred = neural_network.predict(train_data)
 
 algorithm.close_clock_and_show_time(device, start_time)
-display.show_accuracy_rate_and_number_iterations(pred, test_label, it)
+display.show_accuracy_rate_and_number_iterations(pred, train_label, it)
 
 
 
