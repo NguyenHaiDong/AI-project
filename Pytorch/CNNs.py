@@ -12,7 +12,8 @@ import handle_image as handle_image
 def extract_for_CNN(
     device, X, Y, layer_size_for_mlp = [100, 100], c = -1, list_func = None,
     number_conv_layer = 3, C = [16, 16, 16], kernel = [5, 5, 5], s = 1, p = 1,
-    max_pooling_kernel_size = 3, max_pooling_stride = 3, max_pooling_padding = 0
+    max_pooling_kernel_size = 3, max_pooling_stride = 3, max_pooling_padding = 0,
+    max_pooling_activate = [1, 1, 1]
 ):
     X = X.to(device)
     n = X.shape[0]
@@ -28,8 +29,9 @@ def extract_for_CNN(
         cur_w = (w + 2 * p - kernel[i]) // s + 1
         sz.append([cur_h, cur_w])
 
-        cur_h = (cur_h + 2 * max_pooling_padding - max_pooling_kernel_size) // max_pooling_stride + 1
-        cur_w = (cur_w + 2 * max_pooling_padding - max_pooling_kernel_size) // max_pooling_stride + 1
+        if max_pooling_activate[i] == 1:
+            cur_h = (cur_h + 2 * max_pooling_padding - max_pooling_kernel_size) // max_pooling_stride + 1
+            cur_w = (cur_w + 2 * max_pooling_padding - max_pooling_kernel_size) // max_pooling_stride + 1
         h = cur_h
         w = cur_w
 
@@ -45,7 +47,8 @@ def extract_for_CNN(
 
     return (
         n, Y, W, B, grad_W, grad_B, A, Z, dims, sz, c, number_conv_layer, s, p, C, kernel, h, w, layer_size_for_mlp, 
-        max_pooling_kernel_size, max_pooling_stride, max_pooling_padding
+        max_pooling_kernel_size, max_pooling_stride, max_pooling_padding,
+        max_pooling_activate
     )
 
 
@@ -80,6 +83,8 @@ class CNN:
         self.max_pooling_stride = data[20]
         self.max_pooling_padding = data[21]
 
+        self.max_pooling_activate = data[22]
+
         self.pool_cache = [[] for _ in range(self.number_conv_layer)]
         self.GD = gradient_descent
 
@@ -104,12 +109,13 @@ class CNN:
             self.Z[i] = self.Z[i].view(self.A[i].shape[0], self.dims[i + 1], self.sz[i][0], self.sz[i][1])
 
             self.A[i + 1] = algorithm.ReLU(self.Z[i])
-            self.A[i + 1], self.pool_cache[i] = algorithm.max_pooling(
-                self.A[i + 1], self.max_pooling_kernel_size, self.max_pooling_stride, self.max_pooling_padding
-            )
+            if self.max_pooling_activate[i] == 1:
+                self.A[i + 1], self.pool_cache[i] = algorithm.max_pooling(
+                    self.A[i + 1], self.max_pooling_kernel_size, self.max_pooling_stride, self.max_pooling_padding
+                )
 
         N, C, H, W = self.A[-1].shape
-        self.NN_MLP.A[0] = self.A[-1].view(N, C * H * W)
+        self.NN_MLP.A[0] = self.A[-1].view(N, -1)
         self.NN_MLP.feed_forward()
 
 
@@ -119,7 +125,8 @@ class CNN:
         E = E.view(N, C, H, W)
 
         for i in range(self.number_conv_layer - 1, -1, -1):
-            E = algorithm.grad_max_pooling(E, self.pool_cache[i])
+            if self.max_pooling_activate[i] == 1:
+                E = algorithm.grad_max_pooling(E, self.pool_cache[i])
             E *= algorithm.grad_ReLU(self.Z[i])
 
             self.grad_B[i] = torch.sum(E, dim=(0, 2, 3)).unsqueeze(1)
@@ -184,12 +191,11 @@ class CNN:
         return max_it
 
 
-    def predict(self, data):
+    def predict(self, out):
         if torch.backends.mps.is_available():
             torch.mps.empty_cache()
         gc.collect()
 
-        out = data
         for i in range(self.number_conv_layer):
             out = F.unfold(out, kernel_size = self.kernel[i], stride = self.s, padding = self.p)
 
@@ -197,8 +203,9 @@ class CNN:
             out = out.view(out.shape[0], self.dims[i + 1], self.sz[i][0], self.sz[i][1])
 
             out = algorithm.ReLU(out)
-            out = algorithm.max_pooling(out, self.max_pooling_kernel_size, self.max_pooling_stride, self.max_pooling_padding)[0]
+            if self.max_pooling_activate[i]:
+                out = algorithm.max_pooling(out, self.max_pooling_kernel_size, self.max_pooling_stride, self.max_pooling_padding)[0]
 
         N, C, H, W = out.shape
-        out = out.view(N, C * W * H)
+        out = out.view(N, -1)
         return self.NN_MLP.predict(out)
