@@ -191,21 +191,28 @@ class CNN:
         return max_it
 
 
-    def predict(self, out):
+    def predict(self, out, batch_size = 64):
         if torch.backends.mps.is_available():
             torch.mps.empty_cache()
         gc.collect()
 
-        for i in range(self.number_conv_layer):
-            out = F.unfold(out, kernel_size = self.kernel[i], stride = self.s, padding = self.p)
+        list_y = []
+        with torch.no_grad():
+            for start in range(0, out.shape[0], batch_size):
+                end = min(out.shape[0], start + batch_size)
+                X = out[start : end]
 
-            out = self.W[i] @ out + self.B[i]
-            out = out.view(out.shape[0], self.dims[i + 1], self.sz[i][0], self.sz[i][1])
+                for i in range(self.number_conv_layer):
+                    X = F.unfold(X, kernel_size = self.kernel[i], stride = self.s, padding = self.p)
 
-            out = algorithm.ReLU(out)
-            if self.max_pooling_activate[i]:
-                out = algorithm.max_pooling(out, self.max_pooling_kernel_size, self.max_pooling_stride, self.max_pooling_padding)[0]
+                    X = self.W[i] @ X + self.B[i]
+                    X = X.view(X.shape[0], self.dims[i + 1], self.sz[i][0], self.sz[i][1])
 
-        N, C, H, W = out.shape
-        out = out.view(N, -1)
-        return self.NN_MLP.predict(out)
+                    X = algorithm.ReLU(X)
+                    if self.max_pooling_activate[i]:
+                        X = algorithm.max_pooling(X, self.max_pooling_kernel_size, self.max_pooling_stride, self.max_pooling_padding)[0]
+
+                X = X.view(X.shape[0], -1)
+                y = self.NN_MLP.predict(X)
+                list_y.append(y)
+        return torch.cat(list_y, dim = 0)
