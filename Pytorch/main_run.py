@@ -27,7 +27,7 @@ train_data, train_label, test_data, test_label = data_info.get_images(
         "/Users/nguyenhaidong/Desktop/AI/assets/Faces/man",
         "/Users/nguyenhaidong/Desktop/AI/assets/Faces/woman"
     ],
-    number_images = [100, 100],
+    number_images = [1000, 1000],
     width = 64,
     height = 64,
     is_flatten = False
@@ -46,7 +46,8 @@ data = cnn.extract_for_CNN(
     C = [16, 32, 64],
     kernel = [3, 3, 3], s = 1, p = 1,
     max_pooling_kernel_size = 2, max_pooling_stride = 2,
-    max_pooling_activate = [1, 0, 1]
+    max_pooling_activate = [1, 0, 1], 
+    has_GAP = False
 )
 gradient_descent = algorithm.Adam(device, (data[2], data[3]), eta = 0.0003, weight_decay = 0.1, decay_eta = 0.02)
 neural_network = cnn.CNN(device, data, gradient_descent, drop_out = 0.08)

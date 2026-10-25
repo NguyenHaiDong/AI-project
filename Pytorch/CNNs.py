@@ -13,7 +13,7 @@ def extract_for_CNN(
     device, X, Y, layer_size_for_mlp = [100, 100], c = -1, list_func = None,
     number_conv_layer = 3, C = [16, 16, 16], kernel = [5, 5, 5], s = 1, p = 1,
     max_pooling_kernel_size = 3, max_pooling_stride = 3, max_pooling_padding = 0,
-    max_pooling_activate = [1, 1, 1]
+    max_pooling_activate = [1, 1, 1], has_GAP = False
 ):
     X = X.to(device)
     n = X.shape[0]
@@ -48,7 +48,7 @@ def extract_for_CNN(
     return (
         n, Y, W, B, grad_W, grad_B, A, Z, dims, sz, c, number_conv_layer, s, p, C, kernel, h, w, layer_size_for_mlp, 
         max_pooling_kernel_size, max_pooling_stride, max_pooling_padding,
-        max_pooling_activate
+        max_pooling_activate, has_GAP
     )
 
 
@@ -84,12 +84,17 @@ class CNN:
         self.max_pooling_padding = data[21]
 
         self.max_pooling_activate = data[22]
+        self.has_GAP = data[23]
 
         self.pool_cache = [[] for _ in range(self.number_conv_layer)]
         self.GD = gradient_descent
 
+        size_for_X_in_MLP = self.C[-1]
+        if self.has_GAP == False:
+            size_for_X_in_MLP *= self.final_h * self.final_w
+
         mlp_data = mlp.extract_for_MLP(
-            device, torch.zeros(self.n, self.C[-1] * self.final_h * self.final_w , device = device), self.Y, 
+            device, torch.zeros(self.n, size_for_X_in_MLP, device = device), self.Y, 
             number_neurons_per_layer = self.layer_size_for_mlp, 
             list_func = [
                 algorithm.ReLU, algorithm.grad_ReLU,
@@ -115,14 +120,20 @@ class CNN:
                 )
 
         N, C, H, W = self.A[-1].shape
-        self.NN_MLP.A[0] = self.A[-1].view(N, -1)
+        if self.has_GAP:
+            self.NN_MLP.A[0] = torch.sum(self.A[-1], dim = (2,3)) / (H * W)
+        else:
+            self.NN_MLP.A[0] = self.A[-1].view(N, -1)
         self.NN_MLP.feed_forward()
 
 
     def backward_propagation(self, y):
         N, C, H, W = self.A[-1].shape
         E = self.NN_MLP.backward_propagation(y)
-        E = E.view(N, C, H, W)
+        if self.has_GAP:
+            E = E.view(N, C, 1, 1).expand(N, C, H, W) / (H * W)
+        else:
+            E = E.view(N, C, H, W)
 
         for i in range(self.number_conv_layer - 1, -1, -1):
             if self.max_pooling_activate[i] == 1:
@@ -212,7 +223,12 @@ class CNN:
                     if self.max_pooling_activate[i]:
                         X = algorithm.max_pooling(X, self.max_pooling_kernel_size, self.max_pooling_stride, self.max_pooling_padding)[0]
 
-                X = X.view(X.shape[0], -1)
+                N, C, H, W = X.shape
+                if self.has_GAP:
+                    X = torch.sum(X, dim = (2,3)) / (H * W)
+                else:
+                    X = X.view(N, -1)
+
                 y = self.NN_MLP.predict(X)
                 list_y.append(y)
         return torch.cat(list_y, dim = 0)
