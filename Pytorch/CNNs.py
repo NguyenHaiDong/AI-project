@@ -54,7 +54,7 @@ def extract_for_CNN(
 
 
 class CNN:
-    def __init__(self, device, data, gradient_descent, batch_normalization = None, drop_out = 0.1):
+    def __init__(self, device, data, gradient_descent, drop_out = 0.1):
         self.n = data[0]
         self.Y = data[1]
         self.W = data[2]
@@ -145,10 +145,9 @@ class CNN:
             if self.max_pooling_activate[i] == 1:
                 E = algorithm.grad_max_pooling(E, self.pool_cache[i])
                 
-            Z_grad = algorithm.grad_ReLU(self.Z[i])
+            E *= algorithm.grad_ReLU(self.Z[i])
             if self.has_batch_normalization:
-                Z_grad = self.bns[i].backward_propagation(Z_grad)
-            E *= Z_grad
+                E = self.bns[i].backward_propagation(E)
 
             self.grad_B[i] = torch.sum(E, dim=(0, 2, 3)).unsqueeze(1)
 
