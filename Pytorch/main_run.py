@@ -14,6 +14,8 @@ import handle_image as handle_image
 
 torch.manual_seed(2)
 
+# Tắt vĩnh viễn chế độ dựng đồ thị đạo hàm
+torch.set_grad_enabled(False)
 
 
 
@@ -47,10 +49,12 @@ data = cnn.extract_for_CNN(
     kernel = [3, 3, 3], s = 1, p = 1,
     max_pooling_kernel_size = 2, max_pooling_stride = 2,
     max_pooling_activate = [1, 0, 1], 
-    has_GAP = False
+    has_GAP = False,
+    has_batch_normalization = True
 )
 gradient_descent = algorithm.Adam(device, (data[2], data[3]), eta = 0.0003, weight_decay = 0.1, decay_eta = 0.02)
-neural_network = cnn.CNN(device, data, gradient_descent, drop_out = 0.08)
+batch_normalization = algorithm.Batch_Normalization()
+neural_network = cnn.CNN(device, data, gradient_descent, batch_normalization, drop_out = 0.08)
 
 # angles = [5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0]
 # for i in range(len(angles)):

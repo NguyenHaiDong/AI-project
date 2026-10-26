@@ -238,3 +238,57 @@ class Momentum:
             W[i].mul_(decay_factor)
             W[i].add_(grad_W[i], alpha = -cur_eta).add_(self.V_W[i], alpha = -eta_gamma)
             B[i].add_(grad_B[i], alpha = -cur_eta).add_(self.V_B[i], alpha = -eta_gamma)
+
+
+
+
+class Batch_Normalization:
+    def __init__(self, epsilon = 1e-5, momentum = 0.2):
+        self.epsilon = epsilon
+        self.momentum = momentum
+
+        self.mu_run = 0.0
+        self.var_run = 1.0
+        self.inv_var = 1.0
+        self.inv_var_run = 1.0
+        self.Z_hat = None
+
+        self.gamma = 1.0
+        self.beta = 0.0
+
+
+    def feed_forward(self, Z, is_train = True):
+        N, C, H, W = Z.shape
+        m = N * H * W
+
+        if is_train:
+            mu = torch.sum(Z, dim = (0, 2, 3), keepdim = True) / m
+            var = torch.var(Z, dim = (0, 2, 3), keepdim = True, unbiased=False)
+            self.inv_var = torch.sqrt(var + self.epsilon)
+            
+            self.Z_hat = (Z - mu) / self.inv_var
+            Z_out = self.Z_hat * self.gamma + self.beta
+
+            self.mu_run = self.mu_run * (1 - self.momentum) + mu.detach() * self.momentum
+            self.var_run = self.var_run * (1 - self.momentum) + var.detach() * self.momentum
+            self.inv_var_run = torch.sqrt(self.var_run + self.epsilon)
+        else:
+            self.Z_hat = (Z - self.mu_run) / self.inv_var_run
+            Z_out = self.Z_hat * self.gamma + self.beta
+        return Z_out
+
+
+    def backward_propagation(self, Z_hat_grad, eta = 0.01):
+        N, C, H, W = Z_hat_grad.shape
+        m = N * H * W
+        grad_beta = torch.sum(Z_hat_grad, dim = (0, 2, 3), keepdim = True) / m
+
+        Z_temp = Z_hat_grad * self.Z_hat
+        grad_gamma = torch.sum(Z_temp, dim = (0, 2, 3), keepdim = True) / m
+
+        sum2 = self.Z_hat * torch.sum(Z_hat_grad * self.Z_hat, dim = (0, 2, 3), keepdim = True)
+        Z_grad = (self.gamma / (m * self.inv_var)) * (Z_hat_grad * m - grad_beta - sum2)
+
+        self.gamma -= eta * grad_gamma
+        self.beta -= eta * grad_beta
+        return Z_grad

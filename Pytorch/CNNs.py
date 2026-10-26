@@ -13,7 +13,7 @@ def extract_for_CNN(
     device, X, Y, layer_size_for_mlp = [100, 100], c = -1, list_func = None,
     number_conv_layer = 3, C = [16, 16, 16], kernel = [5, 5, 5], s = 1, p = 1,
     max_pooling_kernel_size = 3, max_pooling_stride = 3, max_pooling_padding = 0,
-    max_pooling_activate = [1, 1, 1], has_GAP = False
+    max_pooling_activate = [1, 1, 1], has_GAP = False, has_batch_normalization = False
 ):
     X = X.to(device)
     n = X.shape[0]
@@ -48,13 +48,13 @@ def extract_for_CNN(
     return (
         n, Y, W, B, grad_W, grad_B, A, Z, dims, sz, c, number_conv_layer, s, p, C, kernel, h, w, layer_size_for_mlp, 
         max_pooling_kernel_size, max_pooling_stride, max_pooling_padding,
-        max_pooling_activate, has_GAP
+        max_pooling_activate, has_GAP, has_batch_normalization
     )
 
 
 
 class CNN:
-    def __init__(self, device, data, gradient_descent, drop_out = 0.1):
+    def __init__(self, device, data, gradient_descent, batch_normalization = None, drop_out = 0.1):
         self.n = data[0]
         self.Y = data[1]
         self.W = data[2]
@@ -85,6 +85,9 @@ class CNN:
 
         self.max_pooling_activate = data[22]
         self.has_GAP = data[23]
+        self.has_batch_normalization = data[24]
+        if self.has_batch_normalization == True:
+            self.bns = [algorithm.Batch_Normalization() for _ in range(self.number_conv_layer)] 
 
         self.pool_cache = [[] for _ in range(self.number_conv_layer)]
         self.GD = gradient_descent
@@ -113,6 +116,9 @@ class CNN:
             self.Z[i] = self.W[i] @ A_flatten + self.B[i]
             self.Z[i] = self.Z[i].view(self.A[i].shape[0], self.dims[i + 1], self.sz[i][0], self.sz[i][1])
 
+            if self.has_batch_normalization:
+                self.Z[i] = self.bns[i].feed_forward(self.Z[i], is_train = True)
+
             self.A[i + 1] = algorithm.ReLU(self.Z[i])
             if self.max_pooling_activate[i] == 1:
                 self.A[i + 1], self.pool_cache[i] = algorithm.max_pooling(
@@ -138,7 +144,11 @@ class CNN:
         for i in range(self.number_conv_layer - 1, -1, -1):
             if self.max_pooling_activate[i] == 1:
                 E = algorithm.grad_max_pooling(E, self.pool_cache[i])
-            E *= algorithm.grad_ReLU(self.Z[i])
+                
+            Z_grad = algorithm.grad_ReLU(self.Z[i])
+            if self.has_batch_normalization:
+                Z_grad = self.bns[i].backward_propagation(Z_grad)
+            E *= Z_grad
 
             self.grad_B[i] = torch.sum(E, dim=(0, 2, 3)).unsqueeze(1)
 
@@ -218,6 +228,9 @@ class CNN:
 
                     X = self.W[i] @ X + self.B[i]
                     X = X.view(X.shape[0], self.dims[i + 1], self.sz[i][0], self.sz[i][1])
+
+                    if self.has_batch_normalization:
+                        X = self.bns[i].feed_forward(X, is_train = False)
 
                     X = algorithm.ReLU(X)
                     if self.max_pooling_activate[i]:
