@@ -30,8 +30,8 @@ train_data, train_label, test_data, test_label = data_info.get_images(
         "/kaggle/working/AI-project/Pytorch/assets/Faces/woman"
     ],
     number_images = [9400, 9400],
-    width = 64,
-    height = 64,
+    width = 96,
+    height = 96,
     is_flatten = False
 )
 # handle_image.convert_color(train_data, [1.5])
