@@ -59,7 +59,7 @@ data = cnn.extract_for_CNN(
     has_GAP = False,
     has_batch_normalization = True
 )
-gradient_descent = algorithm.Adam(device, (data[2], data[3]), eta = 0.01, weight_decay = 0.1, decay_eta = 0.075)
+gradient_descent = algorithm.Adam(device, (data[2], data[3]), eta = 0.005, weight_decay = 0.1, decay_eta = 0.03)
 neural_network = cnn.CNN(device, data, gradient_descent, drop_out = 0.1)
 
 # angles = [5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0]
