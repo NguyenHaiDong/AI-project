@@ -50,16 +50,16 @@ print(train_data.shape)
 
 data = cnn.extract_for_CNN(
     device, train_data, train_label, 
-    layer_size_for_mlp = [2048, 256, 64],
-    number_conv_layer = 8, 
-    C = [16, 32, 64, 128, 256, 512, 1024, 2048],
-    kernel = [3, 3, 3, 3, 3, 3, 3, 3], s = 1, p = 1,
+    layer_size_for_mlp = [1024, 256, 64],
+    number_conv_layer = 7, 
+    C = [16, 32, 64, 128, 256, 512, 1024],
+    kernel = [3, 3, 3, 3, 3, 3, 3], s = 1, p = 1,
     max_pooling_kernel_size = 2, max_pooling_stride = 2,
-    max_pooling_activate = [1, 0, 1, 0, 1, 0, 1, 0], 
+    max_pooling_activate = [1, 0, 1, 0, 1, 0, 1], 
     has_GAP = False,
     has_batch_normalization = True
 )
-gradient_descent = algorithm.Adam(device, (data[2], data[3]), eta = 0.0055, weight_decay = 0.1, decay_eta = 0.05)
+gradient_descent = algorithm.Adam(device, (data[2], data[3]), eta = 0.01, weight_decay = 0.1, decay_eta = 0.075)
 neural_network = cnn.CNN(device, data, gradient_descent, drop_out = 0.1)
 
 # angles = [5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45.0]
@@ -72,7 +72,7 @@ neural_network = cnn.CNN(device, data, gradient_descent, drop_out = 0.1)
 # pred = neural_network.predict(test_data)
 
 it = neural_network.fit(
-    device, train_data, data[1], batch_size = 64, delta = 1e-4, max_it = 300,
+    device, train_data, data[1], batch_size = 128, delta = 1e-4, max_it = 300,
     is_test = True, test_batch = 5, test_data = test_data, test_label = test_label 
 )
 pred = neural_network.predict(test_data)
