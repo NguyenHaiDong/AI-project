@@ -17,6 +17,12 @@ torch.manual_seed(2)
 # Tắt vĩnh viễn chế độ dựng đồ thị đạo hàm
 torch.set_grad_enabled(False)
 
+gc.collect()
+
+# 2. Giải phóng toàn bộ bộ nhớ đệm mà PyTorch đang giữ nhưng chưa dùng
+torch.cuda.empty_cache()
+torch.cuda.ipc_collect()
+
 
 
 device = algorithm.open_gpu()
