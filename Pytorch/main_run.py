@@ -37,8 +37,8 @@ train_data, train_label, test_data, test_label = data_info.get_images(
         "/kaggle/working/AI-project/Pytorch/assets/Faces/woman"
     ],
     number_images = [9400, 9400],
-    width = 96,
-    height = 96,
+    width = 72,
+    height = 72,
     is_flatten = False
 )
 # handle_image.convert_color(train_data, [1.5])
@@ -50,12 +50,12 @@ print(train_data.shape)
 
 data = cnn.extract_for_CNN(
     device, train_data, train_label, 
-    layer_size_for_mlp = [1024, 256, 64],
-    number_conv_layer = 7, 
-    C = [16, 32, 64, 128, 256, 512, 1024],
-    kernel = [3, 3, 3, 3, 3, 3, 3], s = 1, p = 1,
+    layer_size_for_mlp = [2048, 256, 64],
+    number_conv_layer = 8, 
+    C = [16, 32, 64, 128, 256, 512, 1024, 2024],
+    kernel = [3, 3, 3, 3, 3, 3, 3, 3], s = 1, p = 1,
     max_pooling_kernel_size = 2, max_pooling_stride = 2,
-    max_pooling_activate = [1, 0, 1, 0, 1, 0, 1], 
+    max_pooling_activate = [1, 0, 1, 0, 1, 0, 1, 0], 
     has_GAP = False,
     has_batch_normalization = True
 )
