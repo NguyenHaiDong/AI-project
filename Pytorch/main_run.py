@@ -65,7 +65,7 @@ start_time = algorithm.open_clock()
 train_data, train_label, test_data, test_label = data_info.load_celeba(
     image_path = "/kaggle/working/AI-project/Pytorch/assets/LARGE_FACE/img_align_celeba",
     attribute_path = "/kaggle/working/AI-project/Pytorch/assets/LARGE_FACE/list_attr_celeba.csv",
-    number_images = 35000,
+    number_images = 50000,
     channels = 3,
     labels = None,  
     image_size = [96, 96],
@@ -82,13 +82,13 @@ data = cnn.extract_for_CNN(
     C = [16, 32, 64, 128, 256, 512, 1024],
     kernel = [3, 3, 3, 3, 3, 3, 3], s = 1, p = 1,
     max_pooling_kernel_size = 2, max_pooling_stride = 2,
-    max_pooling_activate = [1, 1, 0, 1, 0, 1, 0], 
-    has_GAP = False,
+    max_pooling_activate = [1, 0, 1, 0, 1, 0, 1], 
+    has_GAP = True,
     has_batch_normalization = True,
     c = 40
 )
-gradient_descent = algorithm.Adam(device, (data[2], data[3]), eta = 0.004, weight_decay = 0.1, decay_eta = 0.04)
-neural_network = cnn.CNN(device, data, gradient_descent, drop_out = 0.08)
+gradient_descent = algorithm.Adam(device, (data[2], data[3]), eta = 0.005, weight_decay = 0.1, decay_eta = 0.03)
+neural_network = cnn.CNN(device, data, gradient_descent, drop_out = 0.1)
 # neural_network.count_it = 0
 
 it = neural_network.fit(
