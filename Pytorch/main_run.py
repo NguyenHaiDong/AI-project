@@ -51,9 +51,9 @@ start_time = algorithm.open_clock()
 # train_data, train_label, test_data, test_label = data_info.get_images(
 #     device,
 #     folder_paths = [
-#         "/Users/nguyenhaidong/DES/AI/assets/Real Data/Man"
+#         "/Users/nguyenhaidong/DES/AI/assets/Real Data/Woman"
 #     ],
-#     number_images = 1,
+#     number_images = 15,
 #     channels = 3,
 #     width = 96,
 #     height = 96,
@@ -65,7 +65,7 @@ start_time = algorithm.open_clock()
 train_data, train_label, test_data, test_label = data_info.load_celeba(
     image_path = "/Users/nguyenhaidong/DES/AI/assets/LARGE_FACE/img_align_celeba",
     attribute_path = "/Users/nguyenhaidong/DES/AI/assets/LARGE_FACE/list_attr_celeba.csv",
-    number_images = 5000,
+    number_images = 1000,
     channels = 3,
     labels = None,  
     image_size = [96, 96],
@@ -94,14 +94,14 @@ neural_network = cnn.CNN(device, data, gradient_descent, drop_out = 0.08)
 
 it = neural_network.fit(
     device, train_data, data[1], batch_size = 128, delta = 1e-4, max_it = 100,
-    is_test = True, test_batch = 5, test_data = test_data, test_label = test_label,
+    is_test = True, test_batch = 10, test_data = test_data, test_label = test_label,
     path_save_per_test_batch = "/Users/nguyenhaidong/DES/AI/MEM/mem"
 )
 # it = 0
 pred = neural_network.predict(device, test_data)
-neural_network.save("/Users/nguyenhaidong/DES/AI/MEM/mem_attri.pt")
+neural_network.save("/Users/nguyenhaidong/DES/AI/MEM/mem.pt")
 
-# display.show_image_and_attribute(test_data[0], width = 96, height = 96, label = pred[0], attributes = attributes_VN)
+# display.show_image_and_attribute(test_data[1], width = 96, height = 96, label = pred[1], attributes = attributes_VN)
 
 algorithm.close_clock_and_show_time(device, start_time)
 display.show_accuracy_rate_and_number_iterations(device, pred, test_label, it)

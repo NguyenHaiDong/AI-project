@@ -56,7 +56,7 @@ class CNN:
         self.NN_MLP.feed_forward()
 
 
-    def backward_propagation(self, y):
+    def backward_propagation(self, y, batch_size = 64):
         N, C, H, W = self.A[-1].shape
         E = self.NN_MLP.backward_propagation(y)
         if self.has_GAP:
@@ -74,9 +74,9 @@ class CNN:
 
             self.grad_B[i] = torch.sum(E, dim=(0, 2, 3)).unsqueeze(1)
 
-            E_flatten = E.view(E.shape[0], self.dims[i + 1], -1)
+            E_flatten = E.view(E.shape[0], self.dims[i + 1], -1) / batch_size
             A_flatten = F.unfold(self.A[i], kernel_size=self.kernel[i], stride=self.s, padding=self.p)
-            self.grad_W[i] = torch.bmm(E_flatten, A_flatten.transpose(1, 2)).sum(dim=0)
+            self.grad_W[i] = torch.bmm(E_flatten, A_flatten.transpose(1, 2)).sum(dim=0) / batch_size
 
             if i > 0:
                 E_unfold = self.W[i].t() @ E_flatten
@@ -89,14 +89,14 @@ class CNN:
                     padding=self.p
                 )
 
-        for w_g in self.grad_W:
-            w_g.clamp_(-1.0, 1.0)
-        for b_g in self.grad_B:
-            b_g.clamp_(-1.0, 1.0)
-        for w_g in self.NN_MLP.grad_W:
-            w_g.clamp_(-1.0, 1.0)
-        for b_g in self.NN_MLP.grad_B:
-            b_g.clamp_(-1.0, 1.0)
+        # for w_g in self.grad_W:
+        #     w_g.clamp_(-1.0, 1.0)
+        # for b_g in self.grad_B:
+        #     b_g.clamp_(-1.0, 1.0)
+        # for w_g in self.NN_MLP.grad_W:
+        #     w_g.clamp_(-1.0, 1.0)
+        # for b_g in self.NN_MLP.grad_B:
+        #     b_g.clamp_(-1.0, 1.0)
 
 
     def fit(
@@ -122,7 +122,7 @@ class CNN:
                 y = Y[start : end].to(device)
 
                 self.feed_forward()
-                self.backward_propagation(y)
+                self.backward_propagation(batch_size = batch_size, y = y)
                 self.GD.gradient_descent(max(200, self.count_it + it), self.W, self.B, self.grad_W, self.grad_B)
                 self.NN_MLP.gradient_descent(max(200, self.count_it + it))
 
