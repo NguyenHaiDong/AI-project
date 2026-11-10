@@ -182,6 +182,13 @@ def close_clock_and_show_time(device, start_time, s = "Tổng thời gian huấn
 
     print(f"{s}: giấy thứ {elapsed:.3f}")
 
+def clamp_grad(list_g, max_norm = 1.0):
+    cur_norm = torch.sqrt(sum(torch.sum(g ** 2) for g in list_g))
+    clip_coef = max_norm / (cur_norm + 1e-6)
+    if clip_coef < 1.0:
+        for g in list_g:
+            g.mul_(clip_coef)
+
 
 
 

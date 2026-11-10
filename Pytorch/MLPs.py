@@ -68,14 +68,18 @@ class MLP:
 
     def feed_forward(self):
         for i in range(self.number_layers):
-            rand = (torch.rand_like(self.A[i]) > self.drop_out).float() * self.scale
-            A_filter = torch.mul(self.A[i], rand)
+            if i > 0:
+                rand = (torch.rand_like(self.A[i]) > self.drop_out).float() * self.scale
+                A_filter = torch.mul(self.A[i], rand)
+            else:
+                A_filter = self.A[i]
 
             self.Z[i] = torch.addmm(self.B[i], A_filter, self.W[i])
             self.A[i + 1] = self.list_func[2 * i](self.Z[i])
 
 
     def backward_propagation(self, y):
+        batch_size = y.shape[0]
         E = (self.A[-1] - y) / (y.shape[0] * y.shape[1])
 
         for i in range(self.number_layers - 1, -1, -1):

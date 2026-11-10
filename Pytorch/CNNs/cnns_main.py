@@ -24,8 +24,8 @@ class CNN:
 
         self.pool_cache = [[] for _ in range(self.number_conv_layer)]
         self.GD = gradient_descent
-
-        self.bns, self.count_it = init_data.build_bns(self.mem_pretraining, self.file_pretraining, self.has_batch_normalization, self.number_conv_layer)
+  
+        self.bns, self.count_it, self.step_count = init_data.build_bns(self.mem_pretraining, self.file_pretraining, self.has_batch_normalization, self.number_conv_layer)
         self.NN_MLP = init_data.build_MLP(
             device, self.mem_pretraining, self.file_pretraining, self.layer_size_for_mlp, 
             self.has_GAP, self.final_h, self.final_w, drop_out, self.Y, self.C, self.c, self.n
@@ -50,15 +50,17 @@ class CNN:
 
         N, C, H, W = self.A[-1].shape
         if self.has_GAP:
-            self.NN_MLP.A[0] = torch.sum(self.A[-1], dim = (2,3)) / (H * W)
+            self.NN_MLP.A[0] = self.A[-1].mean(dim=(2, 3))
         else:
             self.NN_MLP.A[0] = self.A[-1].view(N, -1)
         self.NN_MLP.feed_forward()
 
 
-    def backward_propagation(self, y, batch_size = 64):
+    def backward_propagation(self, y):
+        batch_size = y.shape[0]
         N, C, H, W = self.A[-1].shape
         E = self.NN_MLP.backward_propagation(y)
+
         if self.has_GAP:
             E = E.view(N, C, 1, 1).expand(N, C, H, W) / (H * W)
         else:
@@ -72,11 +74,11 @@ class CNN:
             if self.has_batch_normalization:
                 E = self.bns[i].backward_propagation(E)
 
-            self.grad_B[i] = torch.sum(E, dim=(0, 2, 3)).unsqueeze(1)
-
-            E_flatten = E.view(E.shape[0], self.dims[i + 1], -1) / batch_size
+            E_flatten = E.view(E.shape[0], self.dims[i + 1], -1)
             A_flatten = F.unfold(self.A[i], kernel_size=self.kernel[i], stride=self.s, padding=self.p)
-            self.grad_W[i] = torch.bmm(E_flatten, A_flatten.transpose(1, 2)).sum(dim=0) / batch_size
+
+            self.grad_B[i] = torch.sum(E, dim=(0, 2, 3)).unsqueeze(1)
+            self.grad_W[i] = torch.bmm(E_flatten, A_flatten.transpose(1, 2)).sum(dim=0)
 
             if i > 0:
                 E_unfold = self.W[i].t() @ E_flatten
@@ -88,15 +90,7 @@ class CNN:
                     stride=self.s,
                     padding=self.p
                 )
-
-        # for w_g in self.grad_W:
-        #     w_g.clamp_(-1.0, 1.0)
-        # for b_g in self.grad_B:
-        #     b_g.clamp_(-1.0, 1.0)
-        # for w_g in self.NN_MLP.grad_W:
-        #     w_g.clamp_(-1.0, 1.0)
-        # for b_g in self.NN_MLP.grad_B:
-        #     b_g.clamp_(-1.0, 1.0)
+        algorithm.clamp_grad(self.grad_W + self.grad_B + self.NN_MLP.grad_W + self.NN_MLP.grad_B, max_norm = 5.0)
 
 
     def fit(
@@ -111,22 +105,22 @@ class CNN:
 
         for it in range(1, max_it + 1, 1):
             sample = torch.randperm(N)
-            X = data[sample]
-            Y = label[sample]
             cur_cost = torch.tensor(0.0, device=device)
 
             for start in range(0, N, batch_size):
                 end = min(N, start + batch_size)
+                batch_index = sample[start : end]
 
-                self.A[0] = X[start : end].to(device)
-                y = Y[start : end].to(device)
+                self.A[0] = data[batch_index].to(device)
+                y = label[batch_index].to(device)
 
                 self.feed_forward()
-                self.backward_propagation(batch_size = batch_size, y = y)
-                self.GD.gradient_descent(max(200, self.count_it + it), self.W, self.B, self.grad_W, self.grad_B)
-                self.NN_MLP.gradient_descent(max(200, self.count_it + it))
+                self.backward_propagation(y)
+                self.GD.gradient_descent(min(1e5, self.step_count), self.W, self.B, self.grad_W, self.grad_B)
+                self.NN_MLP.gradient_descent(min(1e5, self.step_count))
 
                 cur_cost += algorithm.cost(y, self.NN_MLP.A[-1]) * (end - start)
+                self.step_count += 1
 
             cur_cost = (cur_cost / N).item()
             if abs(cur_cost - last_cost) <= delta:
@@ -143,8 +137,7 @@ class CNN:
                 self.save(path_save_per_test_batch + " epoch #" + str(int(it / test_batch)) + ".pt")
                 display.show_accuracy_rate_and_number_iterations(device, pred, test_label, it)
             print(f"Epoch {it}/{max_it} - Cost: {cur_cost:.4f}")
-
-        self.count_it += max_it
+            self.count_it += 1
         return max_it
 
 
@@ -174,7 +167,7 @@ class CNN:
 
                 N, C, H, W = X.shape
                 if self.has_GAP:
-                    X = torch.sum(X, dim = (2,3)) / (H * W)
+                    X = X.mean(dim=(2, 3))
                 else:
                     X = X.view(N, -1)
 
@@ -186,15 +179,10 @@ class CNN:
     def save(self, file_name):
         data = []
         data.append(torch.tensor(self.count_it))
+        data.append(torch.tensor(self.step_count))
 
         if self.has_batch_normalization != "None":
             for i in range(len(self.bns)):
                 data.append(self.bns[i].var_run)
                 data.append(self.bns[i].mu_run)
         data_info.save_to_file([self.W, self.B, self.NN_MLP.W, self.NN_MLP.B], data, file_name)
-
-
-    def load(self, file_name):
-        self.W, self.B, self.NN_MLP.W, self.NN_MLP.B, data = data_info.load_from_file(file_name)
-        self.grad_W = [torch.zeros_like(w) for w in self.W]
-        self.grad_B = [torch.zeros_like(b) for b in self.B]

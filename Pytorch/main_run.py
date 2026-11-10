@@ -85,10 +85,10 @@ data = cnn.extract_for_CNN(
     max_pooling_activate = [1, 0, 1, 0, 1], 
     has_GAP = False,
     has_batch_normalization = True,
-    file_pretraining = "/Users/nguyenhaidong/DES/AI/MEM/mem_attri.pt",
+    file_pretraining = "/Users/nguyenhaidong/DES/AI/MEM/mem epoch #3.pt",
     c = 40
 )
-gradient_descent = algorithm.Adam(device, (data[2], data[3]), eta = 0.005, weight_decay = 0.1, decay_eta = 0.03)
+gradient_descent = algorithm.Adam(device, (data[2], data[3]), eta = 0.005, weight_decay = 1e-4, decay_eta = 0.03)
 neural_network = cnn.CNN(device, data, gradient_descent, drop_out = 0.08)
 # neural_network.count_it = 0
 

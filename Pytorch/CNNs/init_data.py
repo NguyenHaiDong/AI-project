@@ -14,15 +14,18 @@ def build_bns(mem_pretraining, file_pretraining, has_batch_normalization, number
     if file_pretraining != "None":
         pre_data = mem_pretraining[4:]
         count_it = pre_data[0].item()
+        step_count = pre_data[1].item()
 
-        index = 1
+        index = 2
         if has_batch_normalization == True:
             bns = [algorithm.Batch_Normalization(var_run = pre_data[index + i * 2], mu_run = pre_data[index + i * 2 + 1]) for i in range(number_conv_layer)] 
     else:
         count_it = 0
+        step_count = 0
+
         if has_batch_normalization == True:
             bns = [algorithm.Batch_Normalization() for _ in range(number_conv_layer)] 
-    return (bns, count_it)
+    return (bns, count_it, step_count)
 
 
 def build_MLP(device, mem_pretraining, file_pretraining, layer_size_for_mlp, has_GAP, final_h, final_w, drop_out, Y, C, c, n):
