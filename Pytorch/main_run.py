@@ -63,13 +63,13 @@ start_time = algorithm.open_clock()
 # )
 
 train_data, train_label, test_data, test_label = data_info.load_celeba(
-    image_path = "/Users/nguyenhaidong/DES/AI/assets/LARGE_FACE/img_align_celeba",
-    attribute_path = "/Users/nguyenhaidong/DES/AI/assets/LARGE_FACE/list_attr_celeba.csv",
-    number_images = 1000,
+    image_path = "/kaggle/working/AI-project/Pytorch/assets/LARGE_FACE/img_align_celeba",
+    attribute_path = "/kaggle/working/AI-project/Pytorch/assets/LARGE_FACE/list_attr_celeba.csv",
+    number_images = 20000,
     channels = 3,
     labels = None,  
     image_size = [96, 96],
-    divide = [65.0, 35.0],
+    divide = [75.0, 25.0],
 )
 
 print(train_data.shape)
@@ -77,15 +77,15 @@ algorithm.close_clock_and_show_time(device, start_time, "Tổng thời gian đ�
 
 data = cnn.extract_for_CNN(
     device, train_data, train_label, 
-    layer_size_for_mlp = [512, 128],
-    number_conv_layer = 5, 
-    C = [16, 32, 64, 128, 256],
-    kernel = [3, 3, 3, 3, 3], s = 1, p = 1,
+    layer_size_for_mlp = [2048, 512, 128],
+    number_conv_layer = 7, 
+    C = [16, 32, 64, 128, 256, 512, 1024],
+    kernel = [3, 3, 3, 3, 3, 3, 3], s = 1, p = 1,
     max_pooling_kernel_size = 2, max_pooling_stride = 2,
-    max_pooling_activate = [1, 0, 1, 0, 1], 
+    max_pooling_activate = [1, 1, 0, 1, 0, 1, 0], 
     has_GAP = False,
     has_batch_normalization = True,
-    file_pretraining = "/Users/nguyenhaidong/DES/AI/MEM/mem.pt",
+    # file_pretraining = "/Users/nguyenhaidong/DES/AI/MEM/mem.pt",
     c = 40
 )
 gradient_descent = algorithm.Adam(device, (data[2], data[3]), eta = 0.005, weight_decay = 1e-4, decay_eta = 0.03)
@@ -93,13 +93,13 @@ neural_network = cnn.CNN(device, data, gradient_descent, drop_out = 0.08)
 # neural_network.count_it = 0
 
 it = neural_network.fit(
-    device, train_data, data[1], batch_size = 128, delta = 1e-4, max_it = 1,
+    device, train_data, data[1], batch_size = 128, delta = 1e-4, max_it = 100,
     is_test = True, test_batch = 10, test_data = test_data, test_label = test_label,
-    path_save_per_test_batch = "/Users/nguyenhaidong/DES/AI/MEM/mem"
+    path_save_per_test_batch = "mem"
 )
 # it = 0
 pred = neural_network.predict(device, test_data)
-neural_network.save("/Users/nguyenhaidong/DES/AI/MEM/mem.pt")
+neural_network.save("mem.pt")
 
 # display.show_image_and_attribute(test_data[1], width = 96, height = 96, label = pred[1], attributes = attributes_VN)
 
