@@ -6,7 +6,7 @@ import time
 import gc
 
 import torch
-import algorithm
+import Algorithm.algorithm as algorithm
 import data_info
 import display
 import CNNs.cnns as cnn
@@ -85,7 +85,7 @@ data = cnn.extract_for_CNN(
     max_pooling_activate = [1, 0, 1, 0, 1], 
     has_GAP = False,
     has_batch_normalization = True,
-    file_pretraining = "/Users/nguyenhaidong/DES/AI/MEM/mem epoch #3.pt",
+    file_pretraining = "/Users/nguyenhaidong/DES/AI/MEM/mem.pt",
     c = 40
 )
 gradient_descent = algorithm.Adam(device, (data[2], data[3]), eta = 0.005, weight_decay = 1e-4, decay_eta = 0.03)
@@ -93,7 +93,7 @@ neural_network = cnn.CNN(device, data, gradient_descent, drop_out = 0.08)
 # neural_network.count_it = 0
 
 it = neural_network.fit(
-    device, train_data, data[1], batch_size = 128, delta = 1e-4, max_it = 100,
+    device, train_data, data[1], batch_size = 128, delta = 1e-4, max_it = 1,
     is_test = True, test_batch = 10, test_data = test_data, test_label = test_label,
     path_save_per_test_batch = "/Users/nguyenhaidong/DES/AI/MEM/mem"
 )

@@ -1,7 +1,7 @@
-import algorithm
+import Algorithm.algorithm as algorithm
 import torch
 import torch.nn.functional as F
-import MLPs as mlp
+import MLPs.mlps as mlp
 import display
 import gc
 import handle_image as handle_image

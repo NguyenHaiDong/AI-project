@@ -15,14 +15,10 @@ from mnist import MNIST
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 import pandas as pd
+import Algorithm.algorithm as algorithm
 
 # Vô hiệu hóa đa luồng ngầm của OpenCV để tránh tranh chấp luồng trên macOS
 cv2.setNumThreads(0)
-
-try:
-    import algorithm
-except ImportError:
-    algorithm = None
 
 
 def get_MNIST(device, path, number_image=-1):

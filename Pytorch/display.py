@@ -2,7 +2,7 @@ import torch
 import matplotlib.pyplot as plt
 import numpy as np
 
-import algorithm
+import Algorithm.algorithm as algorithm
 
 
 
@@ -21,7 +21,7 @@ def show_accuracy_rate_and_number_iterations(device, A, B, it, endline_ = "\n"):
     A = A.to(device)
     B = B.to(device)
 
-    accuracy_rate = algorithm.get_accuracy_rate(A, B)
+    accuracy_rate = algorithm.get_full_accuracy_rate(A, B)
     # Ép kiểu nếu trả về 0-dim Tensor để in đẹp
     if isinstance(accuracy_rate, torch.Tensor):
         accuracy_rate = accuracy_rate.item()
