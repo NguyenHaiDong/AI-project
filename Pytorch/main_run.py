@@ -65,11 +65,11 @@ start_time = algorithm.open_clock()
 train_data, train_label, test_data, test_label = data_info.load_celeba(
     image_path = "/kaggle/working/AI-project/Pytorch/assets/LARGE_FACE/img_align_celeba",
     attribute_path = "/kaggle/working/AI-project/Pytorch/assets/LARGE_FACE/list_attr_celeba.csv",
-    number_images = 50000,
+    number_images = 200000,
     channels = 3,
     labels = None,  
     image_size = [96, 96],
-    divide = [75.0, 25.0],
+    divide = [80.0, 20.0],
 )
 
 print(train_data.shape)
@@ -83,18 +83,18 @@ data = cnn.extract_for_CNN(
     kernel = [3, 3, 3, 3, 3, 3, 3], s = 1, p = 1,
     max_pooling_kernel_size = 2, max_pooling_stride = 2,
     max_pooling_activate = [1, 1, 0, 1, 0, 1, 0], 
-    has_GAP = False,
+    has_GAP = True,
     has_batch_normalization = True,
     # file_pretraining = "/Users/nguyenhaidong/DES/AI/MEM/mem.pt",
     c = 40
 )
-gradient_descent = algorithm.Adam(device, (data[2], data[3]), eta = 0.005, weight_decay = 1e-4, decay_eta = 0.03)
-neural_network = cnn.CNN(device, data, gradient_descent, drop_out = 0.08)
+gradient_descent = algorithm.Adam(device, (data[2], data[3]), eta = 0.006, weight_decay = 1e-4, decay_eta = 0.03)
+neural_network = cnn.CNN(device, data, gradient_descent, drop_out = 0.1)
 # neural_network.count_it = 0
 
 it = neural_network.fit(
     device, train_data, data[1], batch_size = 128, delta = 1e-4, max_it = 100,
-    is_test = True, test_batch = 10, test_data = test_data, test_label = test_label,
+    is_test = True, test_batch = 5, test_data = test_data, test_label = test_label,
     path_save_per_test_batch = "mem"
 )
 # it = 0
