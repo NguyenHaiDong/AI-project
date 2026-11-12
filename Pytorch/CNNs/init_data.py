@@ -34,7 +34,7 @@ def build_MLP(device, mem_pretraining, file_pretraining, layer_size_for_mlp, has
         size_for_X_in_MLP *= final_h * final_w
 
     if file_pretraining == "None":
-        W, B = None
+        W, B = None, None
         mlp_file_pretraining = "None"
     else:
         W, B = mem_pretraining[2], mem_pretraining[3]
