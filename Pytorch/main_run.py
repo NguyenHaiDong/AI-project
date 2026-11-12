@@ -65,7 +65,7 @@ start_time = algorithm.open_clock()
 train_data, train_label, test_data, test_label = data_info.load_celeba(
     image_path = "/kaggle/working/AI-project/Pytorch/assets/LARGE_FACE/img_align_celeba",
     attribute_path = "/kaggle/working/AI-project/Pytorch/assets/LARGE_FACE/list_attr_celeba.csv",
-    number_images = 20000,
+    number_images = 50000,
     channels = 3,
     labels = None,  
     image_size = [96, 96],
@@ -83,7 +83,7 @@ data = cnn.extract_for_CNN(
     kernel = [3, 3, 3, 3, 3, 3, 3], s = 1, p = 1,
     max_pooling_kernel_size = 2, max_pooling_stride = 2,
     max_pooling_activate = [1, 1, 0, 1, 0, 1, 0], 
-    has_GAP = False,
+    has_GAP = True,
     has_batch_normalization = True,
     # file_pretraining = "/Users/nguyenhaidong/DES/AI/MEM/mem.pt",
     c = 40
