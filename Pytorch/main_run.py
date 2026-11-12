@@ -63,7 +63,7 @@ start_time = algorithm.open_clock()
 # )
 
 train_data, train_label, test_data, test_label = data_info.load_celeba(
-    image_path = "/kaggle/working/AI-project/Pytorchh/assets/LARGE_FACE/img_align_celeba",
+    image_path = "/kaggle/working/AI-project/Pytorch/assets/LARGE_FACE/img_align_celeba",
     attribute_path = "/kaggle/working/AI-project/Pytorch/assets/LARGE_FACE/list_attr_celeba.csv",
     number_images = 50000,
     channels = 3,
