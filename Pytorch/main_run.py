@@ -88,7 +88,7 @@ data = cnn.extract_for_CNN(
     # file_pretraining = "/Users/nguyenhaidong/DES/AI/MEM/mem.pt",
     c = 40
 )
-gradient_descent = algorithm.Adam(device, (data[2], data[3]), eta = 0.006, weight_decay = 1e-4, decay_eta = 0.03)
+gradient_descent = algorithm.Adam(device, (data[2], data[3]), eta = 0.005, weight_decay = 1e-4, decay_eta = 0.03)
 neural_network = cnn.CNN(device, data, gradient_descent, drop_out = 0.1)
 # neural_network.count_it = 0
 
