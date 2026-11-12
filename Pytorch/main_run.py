@@ -65,7 +65,7 @@ start_time = algorithm.open_clock()
 train_data, train_label, test_data, test_label = data_info.load_celeba(
     image_path = "/content/AI-project/Pytorch/assets/LARGE_FACE/img_align_celeba",
     attribute_path = "/content/AI-project/Pytorch/assets/LARGE_FACE/list_attr_celeba.csv",
-    number_images = 20000,
+    number_images = 50000,
     channels = 3,
     labels = None,  
     image_size = [96, 96],
@@ -89,7 +89,7 @@ data = cnn.extract_for_CNN(
     c = 40
 )
 gradient_descent = algorithm.Adam(device, (data[2], data[3]), eta = 0.005, weight_decay = 1e-4, decay_eta = 0.03)
-neural_network = cnn.CNN(device, data, gradient_descent, drop_out = 0.1)
+neural_network = cnn.CNN(device, data, gradient_descent, drop_out = 0.3)
 # neural_network.count_it = 0
 
 it = neural_network.fit(
