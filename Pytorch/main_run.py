@@ -83,7 +83,7 @@ data = cnn.extract_for_CNN(
     kernel = [3, 3, 3, 3, 3, 3, 3], s = 1, p = 1,
     max_pooling_kernel_size = 2, max_pooling_stride = 2,
     max_pooling_activate = [1, 1, 0, 1, 0, 1, 0], 
-    has_GAP = True,
+    has_GAP = False,
     has_batch_normalization = True,
     # file_pretraining = "/Users/nguyenhaidong/DES/AI/MEM/mem.pt",
     c = 40
